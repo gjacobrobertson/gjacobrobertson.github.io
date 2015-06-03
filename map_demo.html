@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+      html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
+    </style>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOz56Cn-wK6PxpuYePUYaNQbfh5i1ou2A">
+    </script>
+    <script type="text/javascript">
+      places = [
+        {
+          address: "584 N Superior Ave, Decatur GA 30033",
+          name: "Jacob",
+          phone: "555 555 5555",
+          email: "user@example.com",
+        },
+        {
+          address: "3447 N Druid Hills Rd, Decatur GA 30033",
+          name: "Anne",
+          phone: "555 666 6666",
+          email: "anne@example.com"
+        }
+      ]
+      var map;
+      var geocoder;
+      function initialize() {
+        geocoder = new google.maps.Geocoder();
+        var mapOptions = {
+          zoom: 11
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            map.setCenter(pos);
+          }, function() {
+            handleNoGeoLocation();
+          });
+        } else {
+          handleNoGeoLocation();
+        }
+
+        places.forEach(function(place) {
+          markPlace(place);
+        });
+      }
+      function handleNoGeoLocation() {
+        map.setCenter(new google.maps.LatLng(33.7550, -84.3900))
+      }
+      function markPlace(place) {
+        geocoder.geocode({'address': place.address}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            var infoWindow = new google.maps.InfoWindow({
+              content: '<div id="content">' + 
+                '<div id="siteNotice"></div>' +
+                '<h1>' + place.name + '</h1>' + 
+                '<div id="bodyContent">' +
+                '<p><b>Address: </b>' + place.address + '</p>' +
+                '<p><b>Phone: </b>' + place.phone + '</p>' +
+                '<p><b>Email: </b>' + place.email + '</p>'
+            });
+            var marker = new google.maps.Marker({
+              map: map,
+              position: results[0].geometry.location,
+              title: place.name
+            });
+            google.maps.event.addListener(marker, 'click', function() {
+              infoWindow.open(map, marker);
+            });
+          }
+        })
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+<div id="map-canvas"></div>
+  </body>
+</html>
